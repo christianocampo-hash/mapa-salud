@@ -1,164 +1,906 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa de Salud - Región de Antofagasta</title>
-    
-    <!-- Estilos CSS de Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com" />
-    
-    <style>
-        /* Restablecer márgenes de la pantalla */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centros Asistenciales de Salud – Región de Antofagasta</title>
 
-        /* Contenedor del Mapa */
-        #map {
-            width: 100%;
-            height: 100vh; /* Ocupa el 100% de la ventana */
-        }
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
-        /* Título flotante elegante */
-        .map-title {
-            position: absolute;
-            top: 15px;
-            left: 60px;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 10px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            margin: 0;
-            font-size: 18px;
-            color: #2c3e50;
-            font-weight: bold;
-            pointer-events: none;
-        }
-    </style>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%);
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      flex-shrink: 0;
+    }
+
+    header .logo {
+      width: 48px;
+      height: 48px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    header p {
+      font-size: 0.8rem;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    /* ── TOOLBAR ─────────────────────────────────────────── */
+    .toolbar {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      flex-shrink: 0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .toolbar-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .filter-btn.public {
+      background: #ebf5fb;
+      border-color: #2980b9;
+      color: #1a5276;
+    }
+
+    .filter-btn.public.active {
+      background: #2980b9;
+      color: #fff;
+    }
+
+    .filter-btn.private {
+      background: #fef9e7;
+      border-color: #d4ac0d;
+      color: #7d6608;
+    }
+
+    .filter-btn.private.active {
+      background: #d4ac0d;
+      color: #fff;
+    }
+
+    .filter-btn:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+
+    .filter-btn .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-public  { background: #2980b9; }
+    .dot-private { background: #d4ac0d; }
+
+    .search-box {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-box input {
+      border: 1px solid #cbd5e0;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      outline: none;
+      width: 220px;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus {
+      border-color: #2563a8;
+    }
+
+    .counter {
+      font-size: 0.78rem;
+      color: #718096;
+      white-space: nowrap;
+    }
+
+    /* ── MAP ─────────────────────────────────────────────── */
+    #map {
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ── POPUP ───────────────────────────────────────────── */
+    .popup-content {
+      min-width: 220px;
+      max-width: 280px;
+    }
+
+    .popup-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .popup-icon {
+      font-size: 26px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .popup-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #1a202c;
+    }
+
+    .popup-badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .badge-public  { background: #d6eaf8; color: #1a5276; }
+    .badge-private { background: #fef9e7; color: #7d6608; }
+
+    .popup-info {
+      font-size: 0.82rem;
+      color: #4a5568;
+      line-height: 1.6;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 8px;
+      margin-top: 6px;
+    }
+
+    .popup-info strong {
+      color: #2d3748;
+    }
+
+    /* ── LEGEND ──────────────────────────────────────────── */
+    .legend {
+      background: rgba(255,255,255,0.95);
+      border-radius: 10px;
+      padding: 12px 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      min-width: 180px;
+    }
+
+    .legend h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #2d3748;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .legend-icon {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+    }
+
+    /* ── FOOTER ──────────────────────────────────────────── */
+    footer {
+      background: #1a3a5c;
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      font-size: 0.72rem;
+      padding: 6px 12px;
+      flex-shrink: 0;
+    }
+
+    footer a { color: rgba(255,255,255,0.85); }
+
+    /* ── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 600px) {
+      header h1 { font-size: 1rem; }
+      .search-box input { width: 140px; }
+      .toolbar { gap: 8px; }
+    }
+  </style>
 </head>
 <body>
 
-    <h1 class="map-title">Red de Centros de Salud - Región de Antofagasta</h1>
-    
-    <!-- El div donde se dibujará el mapa -->
-    <div id="map"></div>
+<!-- HEADER -->
+<header>
+  <div class="logo">🏥</div>
+  <div>
+    <h1>Centros Asistenciales de Salud</h1>
+    <p>Región de Antofagasta, Chile &mdash; Establecimientos Públicos y Privados</p>
+  </div>
+</header>
 
-    <!-- Scripts de la librería Leaflet -->
-    <script src="https://unpkg.com"></script>
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <span class="toolbar-label">Filtrar:</span>
+  <button class="filter-btn public active" id="btn-public" onclick="toggleLayer('public')">
+    <span class="dot dot-public"></span> Público
+  </button>
+  <button class="filter-btn private active" id="btn-private" onclick="toggleLayer('private')">
+    <span class="dot dot-private"></span> Privado
+  </button>
 
-    <script>
-        // 1. Inicializar el mapa centrado en la ciudad de Antofagasta (Coordenadas de la región)
-        const map = L.map('map').setView([-23.6509, -70.3975], 13);
+  <div class="search-box">
+    <input type="text" id="search-input" placeholder="🔍  Buscar establecimiento…" oninput="filterMarkers()" />
+  </div>
+  <span class="counter" id="counter"></span>
+</div>
 
-        // 2. Definición de Estilos de Mapas Base (Fondos)
-        const mapaCallesOSM = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap'
-        });
+<!-- MAP -->
+<div id="map"></div>
 
-        const mapaTraficoGoogle = L.tileLayer('https://google.com{x}&y={y}&z={z}', {
-            maxZoom: 20,
-            attribution: '&copy; Google Maps con Tráfico en Tiempo Real'
-        });
+<!-- FOOTER -->
+<footer>
+  Fuentes: MINSAL &bull; Servicio de Salud Antofagasta &bull; CMDS &bull; Superintendencia de Salud &bull; Datos referenciales 2024&ndash;2025
+</footer>
 
-        // Cargar por defecto el mapa en Modo Tráfico / Calles detalladas solicitado
-        mapaTraficoGoogle.addTo(map);
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Leaflet MarkerCluster JS -->
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
-        // 3. Crear los Grupos de Capas (Overlays) para agrupar los marcadores de salud
-        const capaPublica = L.layerGroup();
-        const capaPrivada = L.layerGroup();
+<script>
+// ─────────────────────────────────────────────────────────────
+// DATOS: Centros de Salud Región de Antofagasta
+// ─────────────────────────────────────────────────────────────
+const establecimientos = [
 
-        // Activarlas en el mapa desde el inicio
-        capaPublica.addTo(map);
-        capaPrivada.addTo(map);
+  // ── PÚBLICOS ─ Ciudad de Antofagasta ──────────────────────
+  {
+    nombre: "Hospital Regional Dr. Leonardo Guzmán",
+    tipo: "public",
+    subtipo: "Hospital de Alta Complejidad",
+    direccion: "Av. Argentina 1962 (Azapa 5935), Antofagasta",
+    telefono: "+56 55 2204648",
+    comuna: "Antofagasta",
+    lat: -23.6345,
+    lng: -70.3970
+  },
+  {
+    nombre: "CESFAM Centro Sur",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Pasaje Niebla 850, Antofagasta",
+    telefono: "+56 55 2655550",
+    comuna: "Antofagasta",
+    lat: -23.6610,
+    lng: -70.4010
+  },
+  {
+    nombre: "CESFAM Central Oriente",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Av. Circunvalación s/n, Antofagasta",
+    telefono: "+56 55 2655100",
+    comuna: "Antofagasta",
+    lat: -23.6520,
+    lng: -70.3840
+  },
+  {
+    nombre: "CESFAM Corvallis",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Av. Salvador Allende 1370, Antofagasta",
+    telefono: "+56 55 2656910",
+    comuna: "Antofagasta",
+    lat: -23.6730,
+    lng: -70.4090
+  },
+  {
+    nombre: "CESFAM Antonio Rendic",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Calle Rendic 6071, Antofagasta",
+    telefono: "+56 55 2656038",
+    comuna: "Antofagasta",
+    lat: -23.6090,
+    lng: -70.3780
+  },
+  {
+    nombre: "CESFAM Norte",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Mateo de Toro y Zambrano esq. Huamachuco, Antofagasta",
+    telefono: "+56 961112704",
+    comuna: "Antofagasta",
+    lat: -23.5940,
+    lng: -70.3840
+  },
+  {
+    nombre: "CESFAM Juan Pablo II",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Teniente Julio Montt s/n, Antofagasta",
+    telefono: "+56 55 2656800",
+    comuna: "Antofagasta",
+    lat: -23.5810,
+    lng: -70.3750
+  },
+  {
+    nombre: "CESFAM Dra. María Cristina Rojas Neumann",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Hilda Cruz Colina 10130, Antofagasta",
+    telefono: "+56 55 2987088",
+    comuna: "Antofagasta",
+    lat: -23.5680,
+    lng: -70.3690
+  },
+  {
+    nombre: "CESFAM Valdivieso",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Cerro Pedregal 8755, Antofagasta",
+    telefono: "—",
+    comuna: "Antofagasta",
+    lat: -23.5550,
+    lng: -70.3620
+  },
+  {
+    nombre: "COSAM Sur",
+    tipo: "public",
+    subtipo: "Centro Comunitario de Salud Mental (COSAM)",
+    direccion: "República de Croacia 0386, Antofagasta",
+    telefono: "+56 55 2841592",
+    comuna: "Antofagasta",
+    lat: -23.6680,
+    lng: -70.4050
+  },
+  {
+    nombre: "COSAM Central",
+    tipo: "public",
+    subtipo: "Centro Comunitario de Salud Mental (COSAM)",
+    direccion: "Calle Rendic 6071, Antofagasta",
+    telefono: "+56 55 2654893",
+    comuna: "Antofagasta",
+    lat: -23.6100,
+    lng: -70.3800
+  },
+  {
+    nombre: "COSAM Norte",
+    tipo: "public",
+    subtipo: "Centro Comunitario de Salud Mental (COSAM)",
+    direccion: "Benito Ocampo, Jardines del Norte 10506, Antofagasta",
+    telefono: "+56 55 657330",
+    comuna: "Antofagasta",
+    lat: -23.5730,
+    lng: -70.3710
+  },
+  {
+    nombre: "Centro Oncológico del Norte (CON)",
+    tipo: "public",
+    subtipo: "Centro Especializado",
+    direccion: "Los Pumas, Sector Chimba Alto 10255, Antofagasta",
+    telefono: "—",
+    comuna: "Antofagasta",
+    lat: -23.5490,
+    lng: -70.3570
+  },
+  {
+    nombre: "CECOSF Coviefi",
+    tipo: "public",
+    subtipo: "Centro Comunitario de Salud Familiar (CECOSF)",
+    direccion: "Santa Rita, Coviefi 02165, Antofagasta",
+    telefono: "—",
+    comuna: "Antofagasta",
+    lat: -23.6420,
+    lng: -70.3910
+  },
 
-               // 4. Configurar los iconos personalizados para diferenciar los centros
-        const dimensionesIcono = [25, 41];
-        const anclajeIcono = [12, 41];
-        const dimensionesSombra = [41, 41];
+  // ── PÚBLICOS ─ Calama ─────────────────────────────────────
+  {
+    nombre: "Hospital Dr. Carlos Cisternas",
+    tipo: "public",
+    subtipo: "Hospital de Alta Complejidad",
+    direccion: "Almirante Grau 1490, Calama",
+    telefono: "+56 55 2655700",
+    comuna: "Calama",
+    lat: -22.4620,
+    lng: -68.9290
+  },
+  {
+    nombre: "CESFAM Central de Calama",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Félix Hoyos s/n, Calama",
+    telefono: "+56 55 2656050",
+    comuna: "Calama",
+    lat: -22.4580,
+    lng: -68.9240
+  },
+  {
+    nombre: "CESFAM Alemania de Calama",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Colonia 2611, Calama",
+    telefono: "+56 55 2656891",
+    comuna: "Calama",
+    lat: -22.4500,
+    lng: -68.9350
+  },
+  {
+    nombre: "CESFAM Norponiente Calama",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Luis Emilio Recabarren 3825, Calama",
+    telefono: "+56 55 2654441",
+    comuna: "Calama",
+    lat: -22.4450,
+    lng: -68.9450
+  },
+  {
+    nombre: "CESFAM Montt Calama",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Granaderos 3968, Calama",
+    telefono: "+56 55 2656650",
+    comuna: "Calama",
+    lat: -22.4680,
+    lng: -68.9380
+  },
+  {
+    nombre: "COSAM Calama",
+    tipo: "public",
+    subtipo: "Centro Comunitario de Salud Mental (COSAM)",
+    direccion: "Argentina 2610, Calama",
+    telefono: "+56 55 2654015",
+    comuna: "Calama",
+    lat: -22.4540,
+    lng: -68.9310
+  },
 
-        const iconoPublico = L.icon({
-            iconUrl: 'https://githubusercontent.com',
-            shadowUrl: 'https://cloudflare.com',
-            iconSize: dimensionesIcono,
-            iconAnchor: anclajeIcono,
-            popupAnchor: [1, -34],
-            shadowSize: dimensionesSombra
-        });
+  // ── PÚBLICOS ─ Otras comunas ──────────────────────────────
+  {
+    nombre: "Hospital Dr. Marcos Macuada",
+    tipo: "public",
+    subtipo: "Hospital",
+    direccion: "Santa Rosa s/n, Tocopilla",
+    telefono: "+56 55 2654560",
+    comuna: "Tocopilla",
+    lat: -22.0920,
+    lng: -70.1960
+  },
+  {
+    nombre: "Hospital de Mejillones",
+    tipo: "public",
+    subtipo: "Hospital Comunitario",
+    direccion: "Bernardo O'Higgins 451, Mejillones",
+    telefono: "+56 55 2655250",
+    comuna: "Mejillones",
+    lat: -23.1020,
+    lng: -70.4450
+  },
+  {
+    nombre: "Hospital 21 de Mayo",
+    tipo: "public",
+    subtipo: "Hospital",
+    direccion: "O'Higgins 450, Taltal",
+    telefono: "+56 55 2656300",
+    comuna: "Taltal",
+    lat: -25.4050,
+    lng: -70.4870
+  },
+  {
+    nombre: "CESFAM San Pedro de Atacama",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Gustavo Le Paige 377, San Pedro de Atacama",
+    telefono: "—",
+    comuna: "San Pedro de Atacama",
+    lat: -22.9080,
+    lng: -68.1990
+  },
+  {
+    nombre: "CESFAM María Elena",
+    tipo: "public",
+    subtipo: "Centro de Salud Familiar (CESFAM)",
+    direccion: "Diego de Almagro s/n, María Elena",
+    telefono: "+56 55 2265332",
+    comuna: "María Elena",
+    lat: -22.3500,
+    lng: -69.6600
+  },
 
-        const iconoPrivado = L.icon({
-            iconUrl: 'https://githubusercontent.com',
-            shadowUrl: 'https://cloudflare.com',
-            iconSize: dimensionesIcono,
-            iconAnchor: anclajeIcono,
-            popupAnchor: [1, -34],
-            shadowSize: dimensionesSombra
-        });
-                
+  // ── PRIVADOS ─ Ciudad de Antofagasta ──────────────────────
+  {
+    nombre: "Clínica Bupa Antofagasta",
+    tipo: "private",
+    subtipo: "Clínica de Alta Complejidad",
+    direccion: "Av. Manuel Antonio Matta 1945, Antofagasta",
+    telefono: "600 712 0020",
+    comuna: "Antofagasta",
+    lat: -23.6490,
+    lng: -70.3980
+  },
+  {
+    nombre: "Clínica Portada",
+    tipo: "private",
+    subtipo: "Clínica",
+    direccion: "Av. Balmaceda 2648, Antofagasta",
+    telefono: "+56 55 2694200",
+    comuna: "Antofagasta",
+    lat: -23.6380,
+    lng: -70.4020
+  },
+  {
+    nombre: "Clínica Cumbres del Norte",
+    tipo: "private",
+    subtipo: "Clínica Especializada",
+    direccion: "San Martín 2447, Antofagasta",
+    telefono: "+56 55 2450600",
+    comuna: "Antofagasta",
+    lat: -23.6440,
+    lng: -70.3960
+  },
+  {
+    nombre: "Centro MEDS Antofagasta",
+    tipo: "private",
+    subtipo: "Centro Médico Especializado",
+    direccion: "Av. Edmundo Pérez Zujovic 5470, Antofagasta",
+    telefono: "+56 22 4996400",
+    comuna: "Antofagasta",
+    lat: -23.6150,
+    lng: -70.3820
+  },
+  {
+    nombre: "Hospital Militar del Norte",
+    tipo: "private",
+    subtipo: "Hospital (Fuerzas Armadas)",
+    direccion: "General Borgoño 957, Antofagasta",
+    telefono: "+56 55 2464000",
+    comuna: "Antofagasta",
+    lat: -23.6510,
+    lng: -70.4030
+  },
+  {
+    nombre: "Clínica Bupa – Centro Médico Angamos",
+    tipo: "private",
+    subtipo: "Centro Médico",
+    direccion: "Av. Angamos 02170, Piso 2, Mall Parque Angamos, Antofagasta",
+    telefono: "600 712 0020",
+    comuna: "Antofagasta",
+    lat: -23.6210,
+    lng: -70.3870
+  },
+  {
+    nombre: "Clínica Belenus (Mall Plaza Antofagasta)",
+    tipo: "private",
+    subtipo: "Centro Médico",
+    direccion: "Av. Balmaceda 2351, Nivel 1 Bulevar Financiero, Antofagasta",
+    telefono: "—",
+    comuna: "Antofagasta",
+    lat: -23.6360,
+    lng: -70.4000
+  },
+  {
+    nombre: "Hospital Clínico Universidad de Antofagasta",
+    tipo: "private",
+    subtipo: "Hospital Universitario",
+    direccion: "Av. Angamos 601, Antofagasta",
+    telefono: "—",
+    comuna: "Antofagasta",
+    lat: -23.6270,
+    lng: -70.3920
+  },
+  {
+    nombre: "Laboratorio Clínico Blanco",
+    tipo: "private",
+    subtipo: "Laboratorio Clínico",
+    direccion: "Av. Manuel Antonio Matta 1839, Antofagasta",
+    telefono: "—",
+    comuna: "Antofagasta",
+    lat: -23.6480,
+    lng: -70.3975
+  },
+  {
+    nombre: "Centro Médico Norte",
+    tipo: "private",
+    subtipo: "Centro Médico",
+    direccion: "Av. Balmaceda 2351, Antofagasta",
+    telefono: "—",
+    comuna: "Antofagasta",
+    lat: -23.6370,
+    lng: -70.4010
+  },
 
+  // ── PRIVADOS ─ Calama ─────────────────────────────────────
+  {
+    nombre: "Clínica Cumbres del Norte – Calama",
+    tipo: "private",
+    subtipo: "Clínica Especializada",
+    direccion: "Granaderos s/n, Calama",
+    telefono: "+56 55 2450600",
+    comuna: "Calama",
+    lat: -22.4610,
+    lng: -68.9270
+  },
+  {
+    nombre: "Laboratorio Clínico COMDES Calama",
+    tipo: "private",
+    subtipo: "Laboratorio Clínico",
+    direccion: "Bañados Espinoza 1850, Calama",
+    telefono: "+56 55 2654420",
+    comuna: "Calama",
+    lat: -22.4560,
+    lng: -68.9260
+  }
+];
 
-        // 5. Cargar los datos de los centros de salud desde el archivo externo JSON
-        fetch('datos.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("No se pudo cargar el archivo datos.json. Verifica su ubicación.");
-                }
-                return response.json();
-            })
-            .then(establecimientos => {
-                // Recorrer los establecimientos del JSON e indexarlos en el mapa
-                establecimientos.forEach(centro => {
-                    
-                    // Validar que el elemento contenga coordenadas correctas
-                    if (centro.latitud && centro.longitud) {
-                        
-                        // Diseñar el contenido informativo que saldrá al pinchar el marcador
-                        const contenidoPopup = `
-                            <div style="font-family: sans-serif; line-height: 1.4;">
-                                <h3 style="margin: 0 0 5px 0; color: #2c3e50;">${centro.nombre}</h3>
-                                <p style="margin: 0; color: #7f8c8d;"><b>Dirección:</b> ${centro.direccion}</p>
-                                <p style="margin: 5px 0 0 0;"><span style="padding: 3px 8px; border-radius: 4px; font-size: 11px; color: #fff; background-color: ${centro.tipo === 'publico' ? '#2980b9' : '#c0392b'};">${centro.tipo.toUpperCase()}</span></p>
-                            </div>
-                        `;
+// ─────────────────────────────────────────────────────────────
+// MAPA
+// ─────────────────────────────────────────────────────────────
+const map = L.map('map', {
+  center: [-23.6509, -70.3975],
+  zoom: 11,
+  zoomControl: true
+});
 
-                        // Crear el marcador físico
-                        const marcador = L.marker([centro.latitud, centro.longitud], {
-                            icon: centro.tipo === 'publico' ? iconoPublico : iconoPrivado
-                        }).bindPopup(contenidoPopup);
+// Capa base OpenStreetMap
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19
+}).addTo(map);
 
-                        // Asignar el marcador a la capa que le corresponde según el JSON
-                        if (centro.tipo === 'publico') {
-                            marcador.addTo(capaPublica);
-                        } else if (centro.tipo === 'privado') {
-                            marcador.addTo(capaPrivada);
-                        }
-                    }
-                });
-            })
-            .catch(error => {
-                console.error("Error procesando los centros de salud:", error);
-                alert("Error al cargar la base de datos de centros de salud. Revisa la consola de desarrollador.");
-            });
+// ─────────────────────────────────────────────────────────────
+// ICONOS PERSONALIZADOS
+// ─────────────────────────────────────────────────────────────
+function createIcon(tipo) {
+  const isPublic = tipo === 'public';
+  const color    = isPublic ? '#2980b9' : '#d4ac0d';
+  const emoji    = isPublic ? '🏥' : '🏨';
+  const border   = isPublic ? '#1a5276' : '#7d6608';
 
-        // 6. Crear los paneles de control interactivos en pantalla (Esquina Superior Derecha)
-        const mapasBase = {
-            "Vista Tráfico / Calles Google": mapaTraficoGoogle,
-            "Vista Clásica OpenStreetMap": mapaCallesOSM
-        };
+  return L.divIcon({
+    className: '',
+    html: `
+      <div style="
+        width: 36px;
+        height: 36px;
+        background: ${color};
+        border: 3px solid ${border};
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+        position: relative;
+      ">
+        <span style="
+          transform: rotate(45deg);
+          font-size: 16px;
+          line-height: 1;
+          display: block;
+          margin-top: -2px;
+        ">${emoji}</span>
+      </div>
+    `,
+    iconSize:   [36, 36],
+    iconAnchor: [18, 36],
+    popupAnchor:[0, -38]
+  });
+}
 
-        const capasSalud = {
-            "🏥 Centros Públicos (Azul)": capaPublica,
-            "🏥 Centros Privados (Rojo)": capaPrivada
-        };
+const iconPublic  = createIcon('public');
+const iconPrivate = createIcon('private');
 
-        // Agregar el control al mapa interactivo para encender/apagar capas
-        L.control.layers(mapasBase, capasSalud, { collapsed: false }).addTo(map);
+// ─────────────────────────────────────────────────────────────
+// CAPAS DE MARCADORES (con clustering)
+// ─────────────────────────────────────────────────────────────
+const clusterPublic = L.markerClusterGroup({
+  iconCreateFunction: function(cluster) {
+    return L.divIcon({
+      html: `<div style="background:#2980b9;color:#fff;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;border:3px solid #1a5276;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${cluster.getChildCount()}</div>`,
+      className: '',
+      iconSize: [38, 38]
+    });
+  }
+});
 
-    </script>
+const clusterPrivate = L.markerClusterGroup({
+  iconCreateFunction: function(cluster) {
+    return L.divIcon({
+      html: `<div style="background:#d4ac0d;color:#fff;border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;border:3px solid #7d6608;box-shadow:0 2px 6px rgba(0,0,0,0.3)">${cluster.getChildCount()}</div>`,
+      className: '',
+      iconSize: [38, 38]
+    });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// CREAR MARCADORES
+// ─────────────────────────────────────────────────────────────
+const allMarkers = [];
+
+establecimientos.forEach(e => {
+  const icon    = e.tipo === 'public' ? iconPublic : iconPrivate;
+  const cluster = e.tipo === 'public' ? clusterPublic : clusterPrivate;
+
+  const badgeClass = e.tipo === 'public' ? 'badge-public' : 'badge-private';
+  const badgeLabel = e.tipo === 'public' ? 'Público' : 'Privado';
+  const iconEmoji  = e.tipo === 'public' ? '🏥' : '🏨';
+
+  const popupHTML = `
+    <div class="popup-content">
+      <div class="popup-header">
+        <div class="popup-icon">${iconEmoji}</div>
+        <div>
+          <div class="popup-title">${e.nombre}</div>
+          <span class="popup-badge ${badgeClass}">${badgeLabel}</span>
+        </div>
+      </div>
+      <div class="popup-info">
+        <strong>Tipo:</strong> ${e.subtipo}<br>
+        <strong>Dirección:</strong> ${e.direccion}<br>
+        <strong>Comuna:</strong> ${e.comuna}<br>
+        <strong>Teléfono:</strong> ${e.telefono}
+      </div>
+    </div>
+  `;
+
+  const marker = L.marker([e.lat, e.lng], { icon })
+    .bindPopup(popupHTML, { maxWidth: 300 });
+
+  marker._data = e;
+  cluster.addLayer(marker);
+  allMarkers.push({ marker, cluster, data: e });
+});
+
+clusterPublic.addTo(map);
+clusterPrivate.addTo(map);
+
+// ─────────────────────────────────────────────────────────────
+// LEYENDA
+// ─────────────────────────────────────────────────────────────
+const legend = L.control({ position: 'bottomright' });
+legend.onAdd = function() {
+  const div = L.DomUtil.create('div', 'legend');
+  div.innerHTML = `
+    <h4>Leyenda</h4>
+    <div class="legend-item">
+      <span class="legend-icon">🏥</span>
+      <span><strong>Establecimiento Público</strong><br><small>Hospital, CESFAM, COSAM, etc.</small></span>
+    </div>
+    <div class="legend-item" style="margin-top:6px">
+      <span class="legend-icon">🏨</span>
+      <span><strong>Establecimiento Privado</strong><br><small>Clínica, Centro Médico, etc.</small></span>
+    </div>
+  `;
+  return div;
+};
+legend.addTo(map);
+
+// ─────────────────────────────────────────────────────────────
+// FILTROS Y BÚSQUEDA
+// ─────────────────────────────────────────────────────────────
+let showPublic  = true;
+let showPrivate = true;
+
+function updateCounter() {
+  let count = 0;
+  if (showPublic)  count += establecimientos.filter(e => e.tipo === 'public').length;
+  if (showPrivate) count += establecimientos.filter(e => e.tipo === 'private').length;
+  document.getElementById('counter').textContent = `${count} establecimiento${count !== 1 ? 's' : ''} visible${count !== 1 ? 's' : ''}`;
+}
+
+function toggleLayer(tipo) {
+  if (tipo === 'public') {
+    showPublic = !showPublic;
+    document.getElementById('btn-public').classList.toggle('active', showPublic);
+    if (showPublic) map.addLayer(clusterPublic);
+    else            map.removeLayer(clusterPublic);
+  } else {
+    showPrivate = !showPrivate;
+    document.getElementById('btn-private').classList.toggle('active', showPrivate);
+    if (showPrivate) map.addLayer(clusterPrivate);
+    else             map.removeLayer(clusterPrivate);
+  }
+  updateCounter();
+}
+
+function filterMarkers() {
+  const query = document.getElementById('search-input').value.toLowerCase().trim();
+
+  clusterPublic.clearLayers();
+  clusterPrivate.clearLayers();
+
+  allMarkers.forEach(({ marker, cluster, data }) => {
+    const match = !query ||
+      data.nombre.toLowerCase().includes(query) ||
+      data.subtipo.toLowerCase().includes(query) ||
+      data.direccion.toLowerCase().includes(query) ||
+      data.comuna.toLowerCase().includes(query);
+
+    if (match) {
+      cluster.addLayer(marker);
+    }
+  });
+
+  // Re-añadir capas si están activas
+  if (showPublic  && !map.hasLayer(clusterPublic))  map.addLayer(clusterPublic);
+  if (showPrivate && !map.hasLayer(clusterPrivate)) map.addLayer(clusterPrivate);
+  if (!showPublic  && map.hasLayer(clusterPublic))  map.removeLayer(clusterPublic);
+  if (!showPrivate && map.hasLayer(clusterPrivate)) map.removeLayer(clusterPrivate);
+
+  updateCounter();
+}
+
+// Inicializar contador
+updateCounter();
+</script>
 </body>
 </html>
