@@ -9,16 +9,18 @@
     <link rel="stylesheet" href="https://unpkg.com" />
     
     <style>
-        body {
+        html, body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
         #map {
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
         }
-        /* Filtro CSS opcional para forzar un aspecto de boceto/blanco y negro de alto contraste */
+        /* Filtro CSS para forzar el aspecto blanco y negro de alto contraste (estilo esquicio) */
         .sketch-map {
             filter: grayscale(100%) brightness(95%) contrast(120%);
         }
@@ -39,25 +41,24 @@
     <script>
         // 1. Inicializar el mapa centrado en la Región de Antofagasta
         const map = L.map('map', {
-            center: [-23.6500, -70.4000], // Coordenadas aproximadas del centro de la región
+            center: [-23.6500, -70.4000], 
             zoom: 7,
             minZoom: 6,
             maxZoom: 14
         });
 
-        // 2. Capa Base estilo "Esquicio" (Blanco y Negro / Alto Contraste)
+        // 2. Capa Base estilo "Esquicio" (Blanco y Negro usando un filtro CSS)
         const capaEsquicio = L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap',
-            className: 'sketch-map' // Aplicamos el filtro CSS para darle el estilo visual
+            attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>',
+            className: 'sketch-map'
         }).addTo(map);
 
-        // Capa alternativa de etiquetas para no perder los nombres de las ciudades
+        // Capa de etiquetas superpuesta
         const etiquetas = L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
             className: 'sketch-map'
         }).addTo(map);
 
-
-        // 3. Iconos personalizados para diferenciar las capas
+        // 3. Iconos personalizados corregidos (Se agregaron los arreglos de tamaño [ancho, alto])
         const iconoPublico = L.icon({
             iconUrl: 'https://google.com',
             iconSize: [32, 32],
@@ -72,9 +73,7 @@
             popupAnchor: [0, -30]
         });
 
-
         // 4. CAPA 1: Salud Pública (Estado y Municipalidades)
-        // Reemplaza las coordenadas [Latitud, Longitud] con los puntos reales que necesites
         const saludPublicaLayer = L.layerGroup([
             L.marker([-23.6441, -70.3922], {icon: iconoPublico}).bindPopup('<b>Hospital Regional de Antofagasta</b><br>Salud Estatal (MINSAL)'),
             L.marker([-22.4561, -68.9261], {icon: iconoPublico}).bindPopup('<b>Hospital Carlos Cisternas</b><br>Calama - Salud Estatal'),
@@ -88,13 +87,11 @@
             L.marker([-22.4612, -68.9315], {icon: iconoPrivado}).bindPopup('<b>Clínica El Loa</b><br>Calama - Establecimiento Privado')
         ]);
 
-
-        // 6. Activar las capas por defecto en el mapa al cargar
+        // 6. Activar ambas capas por defecto al cargar el mapa
         saludPublicaLayer.addTo(map);
         saludPrivadaLayer.addTo(map);
 
-
-        // 7. Controlador de Capas (Menú flotante arriba a la derecha)
+        // 7. Controlador de Capas (Menú flotante interactivo)
         const mapasBase = {
             "Estilo Esquicio": capaEsquicio
         };
@@ -105,7 +102,7 @@
         };
 
         L.control.layers(mapasBase, capasSuperpuestas, {
-            collapsed: false // Mantiene el menú abierto para facilitar la navegación
+            collapsed: false 
         }).addTo(map);
 
     </script>
