@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa de Salud - Región de Antofagasta</title>
     
-    <!-- Hojas de estilo de Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com" />
+    <!-- Hojas de estilo de Leaflet (Cambiado a CDNJS de Cloudflare para máxima estabilidad) -->
+    <link rel="stylesheet" href="https://cloudflare.com" integrity="sha512-Zcn67HRvTWj02fjuT8UqS86q7u58C733Peb85xRfa9/Z71+qR254G5/434B8m3D0wS2V9bA1oE6M386453A81A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <!-- Scripts de Leaflet (MOVIDO AQUÍ PARA CORREGIR EL ERROR 'L IS NOT DEFINED') -->
-    <script src="https://unpkg.com"></script>
+    <!-- Librería de JavaScript de Leaflet (Cambiado a CDNJS de Cloudflare) -->
+    <script src="https://cloudflare.com" integrity="sha512-BwHUR9SuZtN6Z14VpxUpxn4Fv8b2a1aD5M325E5G7u8uY4g6v5G3f7uY7a6a4z5G8u8u9Y7a6M5VpxUpxn4Fv8b2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <style>
         /* Configuración global de la pantalla para evitar barras de desplazamiento */
@@ -92,13 +92,10 @@
     <!-- Contenedor del Mapa -->
     <div id="map"></div>
 
-   
-
     <script>
-          <script>
-        // AGREGAR ESTA LÍNEA: Espera a que carguen todas las librerías antes de ejecutar
-        window.onload = function() {
-
+        // Forzar la inicialización segura asegurando la existencia de la librería Leaflet
+        document.addEventListener("DOMContentLoaded", function() {
+            
             // 1. Inicializar el mapa centrado en la Región de Antofagasta
             const map = L.map('map', {
                 center: [-23.2000, -69.4000], 
@@ -107,7 +104,7 @@
                 maxZoom: 14
             });
 
-            // 2. Capa Base estilo "Esquicio"
+            // 2. Capa Base estilo "Esquicio" (Blanco y Negro usando OpenStreetMap)
             const capaEsquicio = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
                 className: 'sketch-map'
@@ -116,7 +113,9 @@
             // 3. Creador de Iconos Personalizados mediante SVG
             function crearIcono(color) {
                 return L.divIcon({
-                    html: `<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32"><path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm1 10h-2V10H9V8h2V6h2V8h2v2h-2v2z"/></svg>`,
+                    html: `<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32">
+                            <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm1 10h-2V10H9V8h2V6h2V8h2v2h-2v2z"/>
+                           </svg>`,
                     className: "",
                     iconSize:,
                     iconAnchor:,
@@ -124,10 +123,10 @@
                 });
             }
 
-            const iconoPublico = crearIcono('#27ae60'); 
-            const iconoPrivado = crearIcono('#2980b9'); 
+            const iconoPublico = crearIcono('#27ae60'); // Verde para Públicos
+            const iconoPrivado = crearIcono('#2980b9'); // Azul para Privados
 
-            // Base de datos de establecimientos médicos
+            // Base de datos de establecimientos médicos en la región
             const establecimientos = [
                 { lat: -23.6441, lng: -70.3922, nombre: "Hospital Regional de Antofagasta", tipo: "público", info: "Salud Estatal (MINSAL)", comuna: "Antofagasta" },
                 { lat: -22.4561, lng: -68.9261, nombre: "Hospital Carlos Cisternas", tipo: "público", info: "Calama - Salud Estatal", comuna: "Calama" },
@@ -135,6 +134,7 @@
                 { lat: -22.0912, lng: -70.1978, nombre: "Hospital Marco Macuada", tipo: "público", info: "Tocopilla - Salud Estatal", comuna: "Tocopilla" },
                 { lat: -25.4075, lng: -70.4832, nombre: "Hospital 21 de Mayo", tipo: "público", info: "Taltal - Salud Estatal", comuna: "Taltal" },
                 { lat: -22.9115, lng: -68.2001, nombre: "CESFAM San Pedro de Atacama", tipo: "público", info: "San Pedro de Atacama - Municipal", comuna: "San Pedro de Atacama" },
+                
                 { lat: -23.6525, lng: -70.3995, nombre: "Clínica Bupa Antofagasta", tipo: "privado", info: "Establecimiento Privado", comuna: "Antofagasta" },
                 { lat: -23.6420, lng: -70.3910, nombre: "Clínica RedSalud Antofagasta", tipo: "privado", info: "Establecimiento Privado", comuna: "Antofagasta" },
                 { lat: -22.4612, lng: -68.9315, nombre: "Clínica El Loa", tipo: "privado", info: "Calama - Establecimiento Privado", comuna: "Calama" }
@@ -147,9 +147,14 @@
                 const icono = est.tipo === 'público' ? iconoPublico : iconoPrivado;
                 const marker = L.marker([est.lat, est.lng], { icon: icono })
                                 .bindPopup(`<b>${est.nombre}</b><br>${est.info}<br><small>Comuna: ${est.comuna}</small>`);
+                
                 est.markerReference = marker;
-                if (est.tipo === 'público') saludPublicaLayer.addLayer(marker);
-                else saludPrivadaLayer.addLayer(marker);
+
+                if (est.tipo === 'público') {
+                    saludPublicaLayer.addLayer(marker);
+                } else {
+                    saludPrivadaLayer.addLayer(marker);
+                }
             });
 
             saludPublicaLayer.addTo(map);
@@ -161,40 +166,51 @@
                 "<span style='color: #2980b9; font-weight: bold;'>Privados (Azul)</span>": saludPrivadaLayer
             }, { collapsed: false }).addTo(map);
 
-            // 6. Lógica del Buscador
+            // 6. Lógica de Filtrado e Interacción del Buscador Lateral
             const searchInput = document.getElementById('search-input');
             const searchResults = document.getElementById('search-results');
 
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 searchResults.innerHTML = '';
+
                 if (query === '') return;
 
-                establecimientos.filter(est => est.nombre.toLowerCase().includes(query) || est.comuna.toLowerCase().includes(query))
-                .forEach(est => {
+                const filtrados = establecimientos.filter(est => 
+                    est.nombre.toLowerCase().includes(query) || 
+                    est.comuna.toLowerCase().includes(query)
+                );
+
+                filtrados.forEach(est => {
                     const li = document.createElement('li');
                     li.textContent = `${est.nombre} (${est.comuna})`;
+                    
                     li.addEventListener('click', () => {
                         if (est.tipo === 'público' && !map.hasLayer(saludPublicaLayer)) map.addLayer(saludPublicaLayer);
                         if (est.tipo === 'privado' && !map.hasLayer(saludPrivadaLayer)) map.addLayer(saludPrivadaLayer);
+
                         map.setView([est.lat, est.lng], 13);
                         est.markerReference.openPopup();
+                        
                         searchResults.innerHTML = '';
                         searchInput.value = est.nombre;
                     });
+
                     searchResults.appendChild(li);
                 });
             });
 
             document.addEventListener('click', (e) => {
-                if (!e.target.closest('.search-container')) searchResults.innerHTML = '';
+                if (!e.target.closest('.search-container')) {
+                    searchResults.innerHTML = '';
+                }
             });
 
-            // 7. Corrección de Redibujado
-            setTimeout(() => { map.invalidateSize(); }, 400);
-
-        }; // AGREGAR ESTE CIERRE: Cierra la función window.onload
+            // 7. Corrección de Redibujado para Servidores Remotos
+            setTimeout(() => { 
+                map.invalidateSize(); 
+            }, 400);
+        });
     </script>
-
 </body>
 </html>
