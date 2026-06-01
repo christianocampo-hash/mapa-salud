@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa de Salud - Región de Antofagasta</title>
     
-    <!-- Hojas de estilo de Leaflet -->
-    <link rel="stylesheet" href="https://cloudflare.com" />
+    <!-- Hojas de estilo de Leaflet (Enlaces oficiales estables sin CORS) -->
+    <link rel="stylesheet" href="https://unpkg.com" />
     
-    <!-- Librería de JavaScript de Leaflet (Enlaces limpios para evitar errores de lectura) -->
-    <script src="https://cloudflare.com"></script>
+    <!-- Librería de JavaScript de Leaflet oficial -->
+    <script src="https://unpkg.com"></script>
     
     <style>
         /* Configuración global de la pantalla para evitar barras de desplazamiento */
@@ -104,21 +104,21 @@
                 maxZoom: 14
             });
 
-            // 2. Capa Base estilo "Esquicio" (Blanco y Negro usando OpenStreetMap de origen)
+            // 2. Capa Base estilo "Esquicio" (Blanco y Negro usando OpenStreetMap estándar)
             const capaEsquicio = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
                 className: 'sketch-map'
             }).addTo(map);
 
-            // 3. Creador de Iconos Personalizados mediante SVG
+            // 3. Creador de Iconos Personalizados mediante SVG (CORREGIDO: Valores asignados sin comas sueltas)
             function crearIcono(color) {
                 return L.divIcon({
                     html: `<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32">
                             <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm1 10h-2V10H9V8h2V6h2V8h2v2h-2v2z"/>
                            </svg>`,
                     className: "",
-                    iconSize:,
-                    iconAnchor:,
+                    iconSize: [32, 32],      // Ancho y alto del marcador asignados
+                    iconAnchor: [16, 32],    // Punto base de apoyo asignado
                     popupAnchor: [0, -32]
                 });
             }
