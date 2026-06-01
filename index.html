@@ -95,128 +95,106 @@
    
 
     <script>
-        // 1. Inicializar el mapa centrado en la Región de Antofagasta (Centro geográfico regional)
-        const map = L.map('map', {
-            center: [-23.2000, -69.4000], 
-            zoom: 7,
-            minZoom: 6,
-            maxZoom: 14
-        });
+          <script>
+        // AGREGAR ESTA LÍNEA: Espera a que carguen todas las librerías antes de ejecutar
+        window.onload = function() {
 
-        // 2. Capa Base estilo "Esquicio" (Blanco y Negro usando OpenStreetMap estándar como origen de datos)
-        const capaEsquicio = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-            className: 'sketch-map'
-        }).addTo(map);
-
-        // 3. Creador de Iconos Personalizados mediante SVG (Soluciona el error de sintaxis y comas)
-        function crearIcono(color) {
-            return L.divIcon({
-                html: `<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32">
-                        <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm1 10h-2V10H9V8h2V6h2V8h2v2h-2v2z"/>
-                       </svg>`,
-                className: "",
-                iconSize: [32, 32],      // Dimensiones físicas del marcador [ancho, alto]
-                iconAnchor: [16, 32],    // Punto del icono que se posicionará exactamente en la coordenada
-                popupAnchor: [0, -32]    // Punto de origen donde se abrirá el globo de información
+            // 1. Inicializar el mapa centrado en la Región de Antofagasta
+            const map = L.map('map', {
+                center: [-23.2000, -69.4000], 
+                zoom: 7,
+                minZoom: 6,
+                maxZoom: 14
             });
-        }
 
-        // Definición de colores de los iconos para diferenciar las redes de salud
-        const iconoPublico = crearIcono('#27ae60'); // Verde para Establecimientos Públicos
-        const iconoPrivado = crearIcono('#2980b9'); // Azul para Clínicas Privadas
+            // 2. Capa Base estilo "Esquicio"
+            const capaEsquicio = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+                className: 'sketch-map'
+            }).addTo(map);
 
-        // Base de datos de establecimientos médicos en la región
-        const establecimientos = [
-            // CAPA 1: Salud Pública (Estado y Municipalidades) incluyendo Tocopilla, Taltal y San Pedro
-            { lat: -23.6441, lng: -70.3922, nombre: "Hospital Regional de Antofagasta", tipo: "público", info: "Salud Estatal (MINSAL)", comuna: "Antofagasta" },
-            { lat: -22.4561, lng: -68.9261, nombre: "Hospital Carlos Cisternas", tipo: "público", info: "Calama - Salud Estatal", comuna: "Calama" },
-            { lat: -23.6610, lng: -70.4041, nombre: "CESFAM Central Oriente", tipo: "público", info: "Antofagasta - Salud Municipal", comuna: "Antofagasta" },
-            { lat: -22.0912, lng: -70.1978, nombre: "Hospital Marco Macuada", tipo: "público", info: "Tocopilla - Salud Estatal", comuna: "Tocopilla" },
-            { lat: -25.4075, lng: -70.4832, nombre: "Hospital 21 de Mayo", tipo: "público", info: "Taltal - Salud Estatal", comuna: "Taltal" },
-            { lat: -22.9115, lng: -68.2001, nombre: "CESFAM San Pedro de Atacama", tipo: "público", info: "San Pedro de Atacama - Municipal", comuna: "San Pedro de Atacama" },
-            
-            // CAPA 2: Salud Privada (Clínicas Privadas)
-            { lat: -23.6525, lng: -70.3995, nombre: "Clínica Bupa Antofagasta", tipo: "privado", info: "Establecimiento Privado", comuna: "Antofagasta" },
-            { lat: -23.6420, lng: -70.3910, nombre: "Clínica RedSalud Antofagasta", tipo: "privado", info: "Establecimiento Privado", comuna: "Antofagasta" },
-            { lat: -22.4612, lng: -68.9315, nombre: "Clínica El Loa", tipo: "privado", info: "Calama - Establecimiento Privado", comuna: "Calama" }
-        ];
-
-        // Definición de grupos de capas vacías de Leaflet
-        const saludPublicaLayer = L.layerGroup();
-        const saludPrivadaLayer = L.layerGroup();
-
-        // 4. Inyectar los marcadores en sus respectivas capas y almacenar sus referencias
-        establecimientos.forEach(est => {
-            const icono = est.tipo === 'público' ? iconoPublico : iconoPrivado;
-            const marker = L.marker([est.lat, est.lng], { icon: icono })
-                            .bindPopup(`<b>${est.nombre}</b><br>${est.info}<br><small>Comuna: ${est.comuna}</small>`);
-            
-            // Se asocia el marcador físico al objeto de la base de datos para abrirlo remotamente con el buscador
-            est.markerReference = marker;
-
-            if (est.tipo === 'público') {
-                saludPublicaLayer.addLayer(marker);
-            } else {
-                saludPrivadaLayer.addLayer(marker);
+            // 3. Creador de Iconos Personalizados mediante SVG
+            function crearIcono(color) {
+                return L.divIcon({
+                    html: `<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32"><path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm1 10h-2V10H9V8h2V6h2V8h2v2h-2v2z"/></svg>`,
+                    className: "",
+                    iconSize:,
+                    iconAnchor:,
+                    popupAnchor: [0, -32]
+                });
             }
-        });
 
-        // Activar ambas capas de salud por defecto al iniciar la aplicación
-        saludPublicaLayer.addTo(map);
-        saludPrivadaLayer.addTo(map);
+            const iconoPublico = crearIcono('#27ae60'); 
+            const iconoPrivado = crearIcono('#2980b9'); 
 
-        // 5. Controlador de Capas (Menú interactivo flotante en la esquina superior derecha)
-        const mapasBase = { 
-            "Estilo Esquicio": capaEsquicio 
-        };
-        
-        const capasSuperpuestas = {
-            "<span style='color: #27ae60; font-weight: bold;'>Públicos (Verde)</span>": saludPublicaLayer,
-            "<span style='color: #2980b9; font-weight: bold;'>Privados (Azul)</span>": saludPrivadaLayer
-        };
-        
-        L.control.layers(mapasBase, capasSuperpuestas, { collapsed: false }).addTo(map);
+            // Base de datos de establecimientos médicos
+            const establecimientos = [
+                { lat: -23.6441, lng: -70.3922, nombre: "Hospital Regional de Antofagasta", tipo: "público", info: "Salud Estatal (MINSAL)", comuna: "Antofagasta" },
+                { lat: -22.4561, lng: -68.9261, nombre: "Hospital Carlos Cisternas", tipo: "público", info: "Calama - Salud Estatal", comuna: "Calama" },
+                { lat: -23.6610, lng: -70.4041, nombre: "CESFAM Central Oriente", tipo: "público", info: "Antofagasta - Salud Municipal", comuna: "Antofagasta" },
+                { lat: -22.0912, lng: -70.1978, nombre: "Hospital Marco Macuada", tipo: "público", info: "Tocopilla - Salud Estatal", comuna: "Tocopilla" },
+                { lat: -25.4075, lng: -70.4832, nombre: "Hospital 21 de Mayo", tipo: "público", info: "Taltal - Salud Estatal", comuna: "Taltal" },
+                { lat: -22.9115, lng: -68.2001, nombre: "CESFAM San Pedro de Atacama", tipo: "público", info: "San Pedro de Atacama - Municipal", comuna: "San Pedro de Atacama" },
+                { lat: -23.6525, lng: -70.3995, nombre: "Clínica Bupa Antofagasta", tipo: "privado", info: "Establecimiento Privado", comuna: "Antofagasta" },
+                { lat: -23.6420, lng: -70.3910, nombre: "Clínica RedSalud Antofagasta", tipo: "privado", info: "Establecimiento Privado", comuna: "Antofagasta" },
+                { lat: -22.4612, lng: -68.9315, nombre: "Clínica El Loa", tipo: "privado", info: "Calama - Establecimiento Privado", comuna: "Calama" }
+            ];
 
-        // 6. Lógica de Filtrado e Interacción del Buscador Lateral
-        const searchInput = document.getElementById('search-input');
-        const searchResults = document.getElementById('search-results');
+            const saludPublicaLayer = L.layerGroup();
+            const saludPrivadaLayer = L.layerGroup();
 
-        // Escucha cada vez que el usuario escribe en el campo de texto
-        searchInput.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            searchResults.innerHTML = ''; // Vaciar la lista anterior
+            establecimientos.forEach(est => {
+                const icono = est.tipo === 'público' ? iconoPublico : iconoPrivado;
+                const marker = L.marker([est.lat, est.lng], { icon: icono })
+                                .bindPopup(`<b>${est.nombre}</b><br>${est.info}<br><small>Comuna: ${est.comuna}</small>`);
+                est.markerReference = marker;
+                if (est.tipo === 'público') saludPublicaLayer.addLayer(marker);
+                else saludPrivadaLayer.addLayer(marker);
+            });
 
-            if (query === '') return;
+            saludPublicaLayer.addTo(map);
+            saludPrivadaLayer.addTo(map);
 
-            // Filtrar los establecimientos que coincidan por nombre o por comuna
-            const filtrados = establecimientos.filter(est => 
-                est.nombre.toLowerCase().includes(query) || 
-                est.comuna.toLowerCase().includes(query)
-            );
+            // 5. Controlador de Capas
+            L.control.layers({ "Estilo Esquicio": capaEsquicio }, {
+                "<span style='color: #27ae60; font-weight: bold;'>Públicos (Verde)</span>": saludPublicaLayer,
+                "<span style='color: #2980b9; font-weight: bold;'>Privados (Azul)</span>": saludPrivadaLayer
+            }, { collapsed: false }).addTo(map);
 
-            // Crear los elementos visuales de la lista de resultados
-            filtrados.forEach(est => {
-                const li = document.createElement('li');
-                li.textContent = `${est.nombre} (${est.comuna})`;
-                
-                // Evento al hacer click sobre uno de los resultados sugeridos
-                li.addEventListener('click', () => {
-                    // Si el usuario tenía apagada la capa correspondiente en el menú lateral, la enciende automáticamente
-                    if (est.tipo === 'público' && !map.hasLayer(saludPublicaLayer)) map.addLayer(saludPublicaLayer);
-                    if (est.tipo === 'privado' && !map.hasLayer(saludPrivadaLayer)) map.addLayer(saludPrivadaLayer);
+            // 6. Lógica del Buscador
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
 
-                    // Mover la cámara, aplicar zoom de cercanía y abrir el popup de información
-                    map.setView([est.lat, est.lng], 13);
-                    est.markerReference.openPopup();
-                    
-                    // Limpiar el buscador y colocar el nombre seleccionado en la barra
-                    searchResults.innerHTML = '';
-searchInput.value = est.nombre;});searchResults.appendChild(li);});});
-        // Evento global para cerrar la lista del buscador si el usuario hace click en cualquier otra parte del mapa
-        document.addEventListener('click', (e) => {if (!e.target.closest('.search-container')) {searchResults.innerHTML = '';}});
-        // 7. Corrección de Redibujado para Servidores Remotos (Evita pantallas grises en GitHub Pages)
-        setTimeout(() => {map.invalidateSize();}, 400);
-            </script>
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                searchResults.innerHTML = '';
+                if (query === '') return;
+
+                establecimientos.filter(est => est.nombre.toLowerCase().includes(query) || est.comuna.toLowerCase().includes(query))
+                .forEach(est => {
+                    const li = document.createElement('li');
+                    li.textContent = `${est.nombre} (${est.comuna})`;
+                    li.addEventListener('click', () => {
+                        if (est.tipo === 'público' && !map.hasLayer(saludPublicaLayer)) map.addLayer(saludPublicaLayer);
+                        if (est.tipo === 'privado' && !map.hasLayer(saludPrivadaLayer)) map.addLayer(saludPrivadaLayer);
+                        map.setView([est.lat, est.lng], 13);
+                        est.markerReference.openPopup();
+                        searchResults.innerHTML = '';
+                        searchInput.value = est.nombre;
+                    });
+                    searchResults.appendChild(li);
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) searchResults.innerHTML = '';
+            });
+
+            // 7. Corrección de Redibujado
+            setTimeout(() => { map.invalidateSize(); }, 400);
+
+        }; // AGREGAR ESTE CIERRE: Cierra la función window.onload
+    </script>
+
 </body>
 </html>
