@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa de Salud - Región de Antofagasta</title>
     
-    <!-- Hojas de estilo de Leaflet (Cambiado a CDNJS de Cloudflare para máxima estabilidad) -->
-    <link rel="stylesheet" href="https://cloudflare.com" integrity="sha512-Zcn67HRvTWj02fjuT8UqS86q7u58C733Peb85xRfa9/Z71+qR254G5/434B8m3D0wS2V9bA1oE6M386453A81A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Hojas de estilo de Leaflet -->
+    <link rel="stylesheet" href="https://cloudflare.com" />
     
-    <!-- Librería de JavaScript de Leaflet (Cambiado a CDNJS de Cloudflare) -->
-    <script src="https://cloudflare.com" integrity="sha512-BwHUR9SuZtN6Z14VpxUpxn4Fv8b2a1aD5M325E5G7u8uY4g6v5G3f7uY7a6a4z5G8u8u9Y7a6M5VpxUpxn4Fv8b2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Librería de JavaScript de Leaflet (Enlaces limpios para evitar errores de lectura) -->
+    <script src="https://cloudflare.com"></script>
     
     <style>
         /* Configuración global de la pantalla para evitar barras de desplazamiento */
@@ -93,7 +93,7 @@
     <div id="map"></div>
 
     <script>
-        // Forzar la inicialización segura asegurando la existencia de la librería Leaflet
+        // Asegurar la inicialización segura una vez cargada la estructura HTML
         document.addEventListener("DOMContentLoaded", function() {
             
             // 1. Inicializar el mapa centrado en la Región de Antofagasta
@@ -104,7 +104,7 @@
                 maxZoom: 14
             });
 
-            // 2. Capa Base estilo "Esquicio" (Blanco y Negro usando OpenStreetMap)
+            // 2. Capa Base estilo "Esquicio" (Blanco y Negro usando OpenStreetMap de origen)
             const capaEsquicio = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
                 className: 'sketch-map'
