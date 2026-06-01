@@ -1,0 +1,30 @@
+[
+  {
+    "nombre": "Hospital Regional de Antofagasta",
+    "tipo": "publico",
+    "direccion": "Av. Azolas 3345, Antofagasta",
+    "latitud": -23.6334,
+    "longitud": -70.3921
+  },
+  {
+    "nombre": "Centro de Salud Familiar (CESFAM) Central",
+    "tipo": "publico",
+    "direccion": "Avenida Argentina 2340, Antofagasta",
+    "latitud": -23.6512,
+    "longitud": -70.3955
+  },
+  {
+    "nombre": "Clínica Bupa Antofagasta",
+    "tipo": "privado",
+    "direccion": "Manuel Antonio Matta 1845, Antofagasta",
+    "latitud": -23.6478,
+    "longitud": -70.4002
+  },
+  {
+    "nombre": "Clínica CUMS",
+    "tipo": "privado",
+    "direccion": "Avenida Bernardo O'Higgins 1540, Antofagasta",
+    "latitud": -23.6559,
+    "longitud": -70.4031
+  }
+]
