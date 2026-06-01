@@ -77,17 +77,25 @@
         capaPublica.addTo(map);
         capaPrivada.addTo(map);
 
-        // 4. Configurar los iconos personalizados para diferenciar los centros (usando colores estándar)
+                // 4. Configurar los iconos personalizados para diferenciar los centros (Valores fijos corregidos)
         const iconoPublico = L.icon({
             iconUrl: 'https://githubusercontent.com',
-            shadowUrl: '
-https://cloudflare.com
-',
+            shadowUrl: 'https://cloudflare.com',
             iconSize: [25, 41],
             iconAnchor: [12, 41],
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         });
+
+        const iconoPrivado = L.icon({
+            iconUrl: 'https://githubusercontent.com',
+            shadowUrl: 'https://cloudflare.com',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
 
         // 5. Cargar los datos de los centros de salud desde el archivo externo JSON
         fetch('datos.json')
