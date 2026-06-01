@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa de Salud - Región de Antofagasta</title>
     
-    <!-- Hojas de estilo de Leaflet (Enlaces de alta seguridad con Cloudflare CDNJS) -->
-    <link rel="stylesheet" href="https://cloudflare.com" integrity="sha512-Zcn67HRvTWj02fjuT8UqS86q7u58C733Peb85xRfa9/Z71+qR254G5/434B8m3D0wS2V9bA1oE6M386453A81A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    <!-- Librería de JavaScript de Leaflet (Enlaces de alta seguridad con Cloudflare CDNJS) -->
-    <script src="https://cloudflare.com" integrity="sha512-BwHUR9SuZtN6Z14VpxUpxn4Fv8b2a1aD5M325E5G7u8uY4g6v5G3f7uY7a6a4z5G8u8u9Y7a6M5VpxUpxn4Fv8b2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Hojas de estilo de Leaflet -->
+    <link rel="stylesheet" href="https://cloudflare.com" />
     
     <style>
         /* Configuración global de la pantalla para evitar barras de desplazamiento */
@@ -93,16 +90,22 @@
     <div id="map"></div>
 
     <script>
-        // Asegurar la inicialización segura una vez cargada la estructura HTML y las librerías
-        window.addEventListener("load", function() {
+        // SOLUCIÓN DEFINITIVA: Carga asíncrona forzada para evitar bloqueos de caché en GitHub Pages
+        (function() {
+            const script = document.createElement('script');
+            // Usamos un parámetro aleatorio (?v=...) al final de la URL para obligar al navegador a descargar el archivo real
+            script.src = "https://cloudflare.com" + Math.random();
+            script.async = true;
             
-            // Verificación interna de emergencia por si el navegador bloquea la librería
-            if (typeof L === 'undefined') {
-                console.error("Leaflet no se pudo cargar correctamente desde el servidor externo.");
-                alert("Error de conexión: No se pudo cargar la librería de mapas. Por favor, refresca la página.");
-                return;
-            }
+            script.onload = function() {
+                // Todo tu mapa se ejecutará UNICAMENTE cuando la librería esté inyectada y lista en memoria
+                inicializarMapa();
+            };
+            
+            document.head.appendChild(script);
+        })();
 
+        function inicializarMapa() {
             // 1. Inicializar el mapa centrado en la Región de Antofagasta
             const map = L.map('map', {
                 center: [-23.2000, -69.4000], 
@@ -124,8 +127,8 @@
                             <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm1 10h-2V10H9V8h2V6h2V8h2v2h-2v2z"/>
                            </svg>`,
                     className: "",
-                    iconSize:,
-                    iconAnchor:,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32],
                     popupAnchor: [0, -32]
                 });
             }
@@ -212,6 +215,12 @@
                     searchResults.innerHTML = '';
                 }
             });
+
+            // 7. Corrección de Redibujado para Servidores Remotos
+            setTimeout(() => { 
+                map.invalidateSize(); 
+            }, 400);
+        }
     </script>
 </body>
 </html>
