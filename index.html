@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa de Salud - Región de Antofagasta</title>
     
-    <!-- Hojas de estilo de Leaflet -->
+    <!-- Hojas de estilo de Leaflet (CORREGIDO) -->
     <link rel="stylesheet" href="https://unpkg.com" />
     
     <style>
@@ -20,7 +20,7 @@
             width: 100%;
             height: 100%;
         }
-        /* Filtro CSS para forzar el aspecto blanco y negro de alto contraste (estilo esquicio) */
+        /* Filtro CSS para forzar el aspecto blanco y negro */
         .sketch-map {
             filter: grayscale(100%) brightness(95%) contrast(120%);
         }
@@ -35,7 +35,7 @@
     <!-- Contenedor del Mapa -->
     <div id="map"></div>
 
-    <!-- Scripts de Leaflet -->
+    <!-- Scripts de Leaflet (CORREGIDO) -->
     <script src="https://unpkg.com"></script>
 
     <script>
@@ -47,30 +47,29 @@
             maxZoom: 14
         });
 
-        // 2. Capa Base estilo "Esquicio" (Blanco y Negro usando un filtro CSS)
+        // 2. Capa Base estilo "Esquicio" (CORREGIDO: Usando servidores de CartoDB)
         const capaEsquicio = L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>',
             className: 'sketch-map'
         }).addTo(map);
 
-        // Capa de etiquetas superpuesta
-        const etiquetas = L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
-            className: 'sketch-map'
-        }).addTo(map);
-
-        // 3. Iconos personalizados corregidos (Se agregaron los arreglos de tamaño [ancho, alto])
+        // 3. Iconos por defecto de Leaflet (CORREGIDO: Marcadores estándar que sí existen)
         const iconoPublico = L.icon({
-            iconUrl: 'https://google.com',
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -30]
+            iconUrl: 'https://unpkg.com',
+            shadowUrl: 'https://unpkg.com',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
         });
 
         const iconoPrivado = L.icon({
-            iconUrl: 'https://google.com',
-            iconSize: [32, 32],
-            iconAnchor: [16, 32],
-            popupAnchor: [0, -30]
+            iconUrl: 'https://unpkg.com',
+            shadowUrl: 'https://unpkg.com',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
         });
 
         // 4. CAPA 1: Salud Pública (Estado y Municipalidades)
@@ -83,7 +82,7 @@
         // 5. CAPA 2: Salud Privada (Clínicas Privadas)
         const saludPrivadaLayer = L.layerGroup([
             L.marker([-23.6525, -70.3995], {icon: iconoPrivado}).bindPopup('<b>Clínica Bupa Antofagasta</b><br>Establecimiento Privado'),
-            L.marker([-23.6420, -70.3910], {icon: iconoPrivado}).bindPopup('<b>Clínica CCHC Antofagasta</b><br>Establecimiento Privado'),
+            L.marker([-23.6420, -70.3910], {icon: iconoPrivado}).bindPopup('<b>Clínica RedSalud Antofagasta</b><br>Establecimiento Privado'),
             L.marker([-22.4612, -68.9315], {icon: iconoPrivado}).bindPopup('<b>Clínica El Loa</b><br>Calama - Establecimiento Privado')
         ]);
 
@@ -91,7 +90,7 @@
         saludPublicaLayer.addTo(map);
         saludPrivadaLayer.addTo(map);
 
-        // 7. Controlador de Capas (Menú flotante interactivo)
+        // 7. Controlador de Capas
         const mapasBase = {
             "Estilo Esquicio": capaEsquicio
         };
