@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Salud - Región de Antofagasta</title>
+    
+    <!-- Hojas de estilo de Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com" />
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+        /* Filtro CSS opcional para forzar un aspecto de boceto/blanco y negro de alto contraste */
+        .sketch-map {
+            filter: grayscale(100%) brightness(95%) contrast(120%);
+        }
+        .leaflet-popup-content-wrapper {
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Contenedor del Mapa -->
+    <div id="map"></div>
+
+    <!-- Scripts de Leaflet -->
+    <script src="https://unpkg.com"></script>
+
+    <script>
+        // 1. Inicializar el mapa centrado en la Región de Antofagasta
+        const map = L.map('map', {
+            center: [-23.6500, -70.4000], // Coordenadas aproximadas del centro de la región
+            zoom: 7,
+            minZoom: 6,
+            maxZoom: 14
+        });
+
+        // 2. Capa Base estilo "Esquicio" (Blanco y Negro / Alto Contraste)
+        const capaEsquicio = L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap',
+            className: 'sketch-map' // Aplicamos el filtro CSS para darle el estilo visual
+        }).addTo(map);
+
+        // Capa alternativa de etiquetas para no perder los nombres de las ciudades
+        const etiquetas = L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
+            className: 'sketch-map'
+        }).addTo(map);
+
+
+        // 3. Iconos personalizados para diferenciar las capas
+        const iconoPublico = L.icon({
+            iconUrl: 'https://google.com',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -30]
+        });
+
+        const iconoPrivado = L.icon({
+            iconUrl: 'https://google.com',
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -30]
+        });
+
+
+        // 4. CAPA 1: Salud Pública (Estado y Municipalidades)
+        // Reemplaza las coordenadas [Latitud, Longitud] con los puntos reales que necesites
+        const saludPublicaLayer = L.layerGroup([
+            L.marker([-23.6441, -70.3922], {icon: iconoPublico}).bindPopup('<b>Hospital Regional de Antofagasta</b><br>Salud Estatal (MINSAL)'),
+            L.marker([-22.4561, -68.9261], {icon: iconoPublico}).bindPopup('<b>Hospital Carlos Cisternas</b><br>Calama - Salud Estatal'),
+            L.marker([-23.6610, -70.4041], {icon: iconoPublico}).bindPopup('<b>CESFAM Central Oriente</b><br>Antofagasta - Salud Municipal')
+        ]);
+
+        // 5. CAPA 2: Salud Privada (Clínicas Privadas)
+        const saludPrivadaLayer = L.layerGroup([
+            L.marker([-23.6525, -70.3995], {icon: iconoPrivado}).bindPopup('<b>Clínica Bupa Antofagasta</b><br>Establecimiento Privado'),
+            L.marker([-23.6420, -70.3910], {icon: iconoPrivado}).bindPopup('<b>Clínica CCHC Antofagasta</b><br>Establecimiento Privado'),
+            L.marker([-22.4612, -68.9315], {icon: iconoPrivado}).bindPopup('<b>Clínica El Loa</b><br>Calama - Establecimiento Privado')
+        ]);
+
+
+        // 6. Activar las capas por defecto en el mapa al cargar
+        saludPublicaLayer.addTo(map);
+        saludPrivadaLayer.addTo(map);
+
+
+        // 7. Controlador de Capas (Menú flotante arriba a la derecha)
+        const mapasBase = {
+            "Estilo Esquicio": capaEsquicio
+        };
+
+        const capasSuperpuestas = {
+            "Dispositivos Públicos (Estado/Municipios)": saludPublicaLayer,
+            "Clínicas Privadas": saludPrivadaLayer
+        };
+
+        L.control.layers(mapasBase, capasSuperpuestas, {
+            collapsed: false // Mantiene el menú abierto para facilitar la navegación
+        }).addTo(map);
+
+    </script>
+</body>
+</html>
