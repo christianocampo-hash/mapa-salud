@@ -93,11 +93,12 @@
             maxZoom: 14
         });
 
-        // 2. Capa Base estilo "Esquicio" (Blanco y Negro)
-        const capaEsquicio = L.tileLayer('https://{s}://{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors &copy; <a href="https://carto.com">CARTO</a>',
-            className: 'sketch-map'
-        }).addTo(map);
+  // 2. Capa Base alternativa compatible con GitHub Pages
+const capaEsquicio = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+    className: 'sketch-map'
+}).addTo(map);
+
 
         // 3. Creador de Iconos Personalizados mediante SVG (Evita usar imágenes externas rotas)
         function crearIcono(color) {
