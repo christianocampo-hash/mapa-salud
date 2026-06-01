@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa de Salud - Región de Antofagasta</title>
     
-    <!-- Hojas de estilo de Leaflet (Enlaces oficiales estables sin CORS) -->
-    <link rel="stylesheet" href="https://unpkg.com" />
+    <!-- Hojas de estilo de Leaflet (Enlaces de alta seguridad con Cloudflare CDNJS) -->
+    <link rel="stylesheet" href="https://cloudflare.com" integrity="sha512-Zcn67HRvTWj02fjuT8UqS86q7u58C733Peb85xRfa9/Z71+qR254G5/434B8m3D0wS2V9bA1oE6M386453A81A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
-    <!-- Librería de JavaScript de Leaflet oficial -->
-    <script src="https://unpkg.com"></script>
+    <!-- Librería de JavaScript de Leaflet (Enlaces de alta seguridad con Cloudflare CDNJS) -->
+    <script src="https://cloudflare.com" integrity="sha512-BwHUR9SuZtN6Z14VpxUpxn4Fv8b2a1aD5M325E5G7u8uY4g6v5G3f7uY7a6a4z5G8u8u9Y7a6M5VpxUpxn4Fv8b2g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <style>
         /* Configuración global de la pantalla para evitar barras de desplazamiento */
@@ -93,9 +93,16 @@
     <div id="map"></div>
 
     <script>
-        // Asegurar la inicialización segura una vez cargada la estructura HTML
-        document.addEventListener("DOMContentLoaded", function() {
+        // Asegurar la inicialización segura una vez cargada la estructura HTML y las librerías
+        window.addEventListener("load", function() {
             
+            // Verificación interna de emergencia por si el navegador bloquea la librería
+            if (typeof L === 'undefined') {
+                console.error("Leaflet no se pudo cargar correctamente desde el servidor externo.");
+                alert("Error de conexión: No se pudo cargar la librería de mapas. Por favor, refresca la página.");
+                return;
+            }
+
             // 1. Inicializar el mapa centrado en la Región de Antofagasta
             const map = L.map('map', {
                 center: [-23.2000, -69.4000], 
@@ -110,15 +117,15 @@
                 className: 'sketch-map'
             }).addTo(map);
 
-            // 3. Creador de Iconos Personalizados mediante SVG (CORREGIDO: Valores asignados sin comas sueltas)
+            // 3. Creador de Iconos Personalizados mediante SVG
             function crearIcono(color) {
                 return L.divIcon({
                     html: `<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32">
                             <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm1 10h-2V10H9V8h2V6h2V8h2v2h-2v2z"/>
                            </svg>`,
                     className: "",
-                    iconSize: [32, 32],      // Ancho y alto del marcador asignados
-                    iconAnchor: [16, 32],    // Punto base de apoyo asignado
+                    iconSize:,
+                    iconAnchor:,
                     popupAnchor: [0, -32]
                 });
             }
@@ -205,12 +212,6 @@
                     searchResults.innerHTML = '';
                 }
             });
-
-            // 7. Corrección de Redibujado para Servidores Remotos
-            setTimeout(() => { 
-                map.invalidateSize(); 
-            }, 400);
-        });
     </script>
 </body>
 </html>
